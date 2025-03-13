@@ -1347,7 +1347,11 @@ local function close_preview_window(winnr, bufnrs)
 
     local augroup = 'preview_window_' .. winnr
     pcall(api.nvim_del_augroup_by_name, augroup)
-    pcall(api.nvim_win_close, winnr, true)
+    if pcall(api.nvim_win_close, winnr, true) then
+      -- Entering insert mode by 'o'/'O' does not trigger WinClosed,
+      -- hence does not clear the hover range hl
+      api.nvim_exec_autocmds('WinClosed', { pattern = tostring(winnr) })
+    end
   end)
 end
 
